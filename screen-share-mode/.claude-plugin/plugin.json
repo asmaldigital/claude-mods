@@ -1,0 +1,11 @@
+{
+  "name": "screen-share-mode",
+  "version": "0.3.0",
+  "license": "MIT",
+  "description": "Screen share mode: type /screen-share before a call or recording and client names, emails, phone numbers and money amounts show as made-up stand-ins on screen (or grey bars, if you prefer). Claude still sees the real chat.",
+  "types": "./types/index.d.ts",
+  "author": {
+    "name": "Asmal Digital"
+  },
+  "repository": "https://github.com/asmaldigital/claude-mods"
+}

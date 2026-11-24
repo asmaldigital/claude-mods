@@ -1,0 +1,11 @@
+{
+  "name": "team-board",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Team Board: a progress bar above the message box for the plan Claude is working through, and a side panel with a live card for every subagent: what it is doing, its tool calls, tokens and estimated cost.",
+  "types": "./types/index.d.ts",
+  "author": {
+    "name": "Asmal Digital"
+  },
+  "repository": "https://github.com/asmaldigital/claude-mods"
+}

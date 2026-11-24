@@ -1,0 +1,11 @@
+{
+  "name": "amplify-theme",
+  "version": "0.3.0",
+  "license": "MIT",
+  "description": "Amplify: a navy, cyan and orange look for the Claude desktop and mobile apps that turns your work into a momentum game, plus an /amplify-focus switch.",
+  "types": "./types/index.d.ts",
+  "author": {
+    "name": "Asmal Digital"
+  },
+  "repository": "https://github.com/asmaldigital/claude-mods"
+}

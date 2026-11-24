@@ -1,0 +1,11 @@
+{
+  "name": "handoff",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Handoff: when a chat gets long, packs the goal, plan, files, skills, links and last reply into a handoff prompt, copies it, and offers a Pick up button in your next fresh chat. No AI, no tokens.",
+  "types": "./types/index.d.ts",
+  "author": {
+    "name": "Asmal Digital"
+  },
+  "repository": "https://github.com/asmaldigital/claude-mods"
+}

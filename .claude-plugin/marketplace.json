@@ -1,0 +1,47 @@
+{
+  "name": "asmal-mods",
+  "owner": {
+    "name": "Asmal Digital"
+  },
+  "metadata": {
+    "description": "Six free mods for the Claude app and Claude Code: Amplify theme, Handoff, Jargon Buster, Load, Screen share mode and Team Board."
+  },
+  "plugins": [
+    {
+      "name": "amplify-theme",
+      "source": "./amplify-theme",
+      "description": "Amplify: a navy, cyan and orange look for the Claude desktop and mobile apps that turns your work into a momentum game, plus an /amplify-focus switch.",
+      "version": "0.3.0"
+    },
+    {
+      "name": "handoff",
+      "source": "./handoff",
+      "description": "Handoff: when a chat gets long, packs the goal, plan, files, skills, links and last reply into a handoff prompt, copies it, and offers a Pick up button in your next fresh chat. No AI, no tokens.",
+      "version": "0.1.0"
+    },
+    {
+      "name": "jargon-buster",
+      "source": "./jargon-buster",
+      "description": "Jargon Buster: type /jargon-buster and Claude re-explains its last reply in plain, beginner language, or answers one question you add, without redoing any work.",
+      "version": "0.1.0"
+    },
+    {
+      "name": "load-monitor",
+      "source": "./load-monitor",
+      "description": "Load: a small band above the message box with live CPU, RAM and GPU bars for this Mac, and a warning that names the process when CPU spikes. No AI, no tokens. Type /load to show or hide it.",
+      "version": "0.1.0"
+    },
+    {
+      "name": "screen-share-mode",
+      "source": "./screen-share-mode",
+      "description": "Screen share mode: type /screen-share before a call or recording and client names, emails, phone numbers and money amounts show as made-up stand-ins on screen (or grey bars, if you prefer). Claude still sees the real chat.",
+      "version": "0.3.0"
+    },
+    {
+      "name": "team-board",
+      "source": "./team-board",
+      "description": "Team Board: a progress bar above the message box for the plan Claude is working through, and a side panel with a live card for every subagent: what it is doing, its tool calls, tokens and estimated cost.",
+      "version": "0.1.0"
+    }
+  ]
+}

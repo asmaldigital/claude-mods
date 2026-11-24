@@ -1,0 +1,10 @@
+{
+  "name": "jargon-buster",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Jargon Buster: type /jargon-buster and Claude re-explains its last reply in plain, beginner language, or answers one question you add, without redoing any work.",
+  "author": {
+    "name": "Asmal Digital"
+  },
+  "repository": "https://github.com/asmaldigital/claude-mods"
+}

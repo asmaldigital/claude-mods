@@ -1,0 +1,11 @@
+{
+  "name": "load-monitor",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Load: a small band above the message box with live CPU, RAM and GPU bars for this Mac, and a warning that names the process when CPU spikes. No AI, no tokens. Type /load to show or hide it.",
+  "types": "./types/index.d.ts",
+  "author": {
+    "name": "Asmal Digital"
+  },
+  "repository": "https://github.com/asmaldigital/claude-mods"
+}
