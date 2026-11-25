@@ -97,12 +97,12 @@ test('fake-mode-still-bars-keys', () => {
   expect(redact('key sk-ant-abcdefghijklmnop123', [], 'fake')).toContain('█████')
 })
 
-function engine(on: On) {
+function engine(on: On, folders = [{ name: 'client--zephyr-plumbing', kind: 'dir', size: 0, mtimeMs: 0, isLink: false }]) {
   on('session.start', (_, e) => ({ cwd: e.cwd }))
   on('command.register', (_, e) => ({ value: { command: e.name } }))
   on('ui.toast', () => ({ value: undefined }) as never)
   on('ui.status', () => ({ value: undefined }) as never)
-  on('fs.list', () => ({ value: [{ name: 'client--zephyr-plumbing', kind: 'dir', size: 0, mtimeMs: 0, isLink: false }] }) as never)
+  on('fs.list', () => ({ value: folders }) as never)
   const stored = new Map<string, unknown>()
   on('store.get', (_, e) => ({ value: stored.get(e.key) }))
   on('store.set', (_, e) => {
@@ -146,4 +146,21 @@ test('made-up-details-are-the-default-and-bars-are-remembered', async ($, on) =>
   expect(first.text).toContain('made-up')
   expect(bars.text).toContain('grey bars')
   expect(again.text).toContain('grey bars')
+})
+
+test('fake-mode-masks-amounts-instead-of-inventing-them', () => {
+  expect(redact('Setup is $4,500 and the retainer is R12 000.', [], 'fake')).toBe('Setup is $X,XXX and the retainer is RXX XXX.')
+})
+
+test('warns-loudly-when-no-client-names-are-added', async ($, on) => {
+  engine(on, [])
+
+  await $.session.start({ cwd: '/tmp', surface: 'desktop', isInteractive: true })
+  const bare = await $.command.run({ command: 'screen-share', args: '' } as never)
+  expect(bare.text).toContain('client names WILL still show')
+
+  await $.command.run({ command: 'screen-share', args: '' } as never)
+  await $.command.run({ command: 'screen-share', args: 'add Quillon Holdings' } as never)
+  const named = await $.command.run({ command: 'screen-share', args: '' } as never)
+  expect(named.text).not.toContain('WILL still show')
 })

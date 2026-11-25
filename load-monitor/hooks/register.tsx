@@ -223,9 +223,9 @@ export const register: Register = on => {
     }
   })
 
-  // The chat is over: stop the timer.
+  // The chat is over: stop the timer. A /clear keeps the same chat going, so the bars keep running.
   on('session.end', ($, e, next) => {
-    stop()
+    if (e.reason !== 'clear') stop()
 
     return next(e)
   }).catch(($, e, next) => next(e))

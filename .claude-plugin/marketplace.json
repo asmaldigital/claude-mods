@@ -17,7 +17,7 @@
       "name": "handoff",
       "source": "./handoff",
       "description": "Handoff: when a chat gets long, packs the goal, plan, files, skills, links and last reply into a handoff prompt, copies it, and offers a Pick up button in your next fresh chat. No AI, no tokens.",
-      "version": "0.1.0"
+      "version": "0.1.1"
     },
     {
       "name": "jargon-buster",
@@ -29,13 +29,13 @@
       "name": "load-monitor",
       "source": "./load-monitor",
       "description": "Load: a small band above the message box with live CPU, RAM and GPU bars for this Mac, and a warning that names the process when CPU spikes. No AI, no tokens. Type /load to show or hide it.",
-      "version": "0.1.0"
+      "version": "0.1.1"
     },
     {
       "name": "screen-share-mode",
       "source": "./screen-share-mode",
-      "description": "Screen share mode: type /screen-share before a call or recording and client names, emails, phone numbers and money amounts show as made-up stand-ins on screen (or grey bars, if you prefer). Claude still sees the real chat.",
-      "version": "0.3.0"
+      "description": "Screen share mode: type /screen-share before a call or recording. Emails, phone numbers and amounts are hidden on screen, and so are the client names you add with /screen-share add. Claude still sees the real chat.",
+      "version": "0.4.0"
     },
     {
       "name": "team-board",

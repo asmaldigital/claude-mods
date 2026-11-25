@@ -102,9 +102,13 @@ test('store-keeps-one-fresh-handoff-per-folder', () => {
   expect(tidy('not a shelf', now)).toEqual({})
 })
 
-function engine(on: On, stored: Map<string, unknown>) {
+function engine(on: On, stored: Map<string, unknown>, taken: string[] = []) {
   on('session.start', (_, e) => ({ cwd: e.cwd }))
-  on('command.register', (_, e) => ({ value: { command: e.name } }))
+  on('command.register', (_, e) => {
+    if (taken.includes(e.name)) throw new Error(`"/${e.name}" refused: it is the plugin's /command-center:${e.name}`)
+
+    return { value: { command: e.name } }
+  })
   on('ui.toast', () => ({ value: undefined }) as never)
   on('ui.copy', () => ({ value: { isCopied: true } }) as never)
   on('session.messages', () => ({ value: CHAT }) as never)
@@ -137,4 +141,12 @@ test('command-prepares-copies-and-files-the-handoff-by-folder', async ($, on) =>
   const shelf = stored.get('handoffs') as Record<string, { text: string }>
   expect(Object.keys(shelf).sort()).toEqual(['/a', '/b'])
   expect(shelf['/b']?.text).toBe('other project')
+})
+
+test('falls-back-to-handoff-chat-when-handoff-is-taken', async ($, on) => {
+  engine(on, new Map<string, unknown>(), ['handoff'])
+
+  await $.session.start({ cwd: '/a', surface: 'desktop', isInteractive: true })
+  const r = await $.command.run({ command: 'handoff-chat', args: '' } as never)
+  expect(r.text).toContain('Handoff ready')
 })

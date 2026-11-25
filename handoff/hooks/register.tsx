@@ -1,5 +1,5 @@
 import { atom, read, update } from 'claude-code'
-import type { EngineInterface, Register, SessionMessage } from 'claude-code'
+import type { EngineInterface, Register, SessionMessage, CommandRunResult } from 'claude-code'
 
 import type { Desk, Saved } from '../types'
 
@@ -289,17 +289,38 @@ async function lookFor($: EngineInterface, cwd: string, sessionId: string | unde
   await update($, desk, () => ({ ...QUIET, offer }))
 }
 
+/** Answers /handoff or /handoff-chat: prepares, copies and shows the handoff. */
+async function runHandoff($: EngineInterface): Promise<CommandRunResult> {
+  try {
+    const text = await prepare($)
+    let isCopied = false
+    await quietly(async () => {
+      isCopied = (await $.ui.copy({ text })).isCopied
+    })
+
+    return {
+      text: `Handoff ready${isCopied ? ' and copied to your clipboard' : ''}. Check it before you pass it on. Open a new chat in this folder and press Pick up, or copy it from here.\n\n${text}`,
+      isTextDisplayOnly: true,
+    }
+  } catch (error) {
+    return { text: `Handoff could not be prepared: ${String(error)}`, isTextDisplayOnly: true }
+  }
+}
+
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     await quietly(async () => lookFor($, e.cwd, await $.session.id()))
 
+    // Another plugin (for example Command Center) may already own /handoff: fall back to /handoff-chat.
+    const description = 'Pack this chat into a handoff prompt for a fresh chat (no tokens)'
     try {
-      await $.command.register({
-        name: 'handoff',
-        description: 'Pack this chat into a handoff prompt for a fresh chat (no tokens)',
-      })
-    } catch (error) {
-      $.ui.toast(`Handoff: /handoff not added. ${String(error)}`)
+      await $.command.register({ name: 'handoff', description })
+    } catch {
+      try {
+        await $.command.register({ name: 'handoff-chat', description })
+      } catch (error) {
+        $.ui.toast(`Handoff: /handoff and /handoff-chat are both taken. ${String(error)}`)
+      }
     }
 
     return next(e)
@@ -325,22 +346,8 @@ export const register: Register = on => {
     return next(e)
   }).catch(($, e, next) => next(e))
 
-  on('command.run', { command: 'handoff' }, async $ => {
-    try {
-      const text = await prepare($)
-      let isCopied = false
-      await quietly(async () => {
-        isCopied = (await $.ui.copy({ text })).isCopied
-      })
-
-      return {
-        text: `Handoff ready${isCopied ? ' and copied to your clipboard' : ''}. Check it before you pass it on. Open a new chat in this folder and press Pick up, or copy it from here.\n\n${text}`,
-        isTextDisplayOnly: true,
-      }
-    } catch (error) {
-      return { text: `Handoff could not be prepared: ${String(error)}`, isTextDisplayOnly: true }
-    }
-  })
+  on('command.run', { command: 'handoff' }, runHandoff)
+  on('command.run', { command: 'handoff-chat' }, runHandoff)
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     if (e.props.hasSurvey) return next(e)

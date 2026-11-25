@@ -82,18 +82,6 @@ function hash(text: string): number {
   return h >>> 0
 }
 
-/** Swaps each digit for another, keeping the length, separators and currency. */
-function fakeDigits(value: string): string {
-  let h = hash(value)
-  let first = true
-  return value.replace(/\d/g, () => {
-    h = Math.imul(h ^ 0x9e3779b9, 2654435761) >>> 0
-    const d = first ? 1 + (h % 9) : h % 10
-    first = false
-    return String(d)
-  })
-}
-
 /** The stand-in for one detail: a grey bar, or a made-up value that stays the same. */
 export function standIn(kind: Kind | 'name', value: string, style: Style): string {
   if (style === 'bars' || kind === 'key') return BAR
@@ -101,7 +89,8 @@ export function standIn(kind: Kind | 'name', value: string, style: Style): strin
   if (kind === 'name') return FAKE_NAMES[n % FAKE_NAMES.length]!
   if (kind === 'email') return `contact${n % 900 + 100}@example.com`
   if (kind === 'phone') return `+1 555 01${String(n % 100).padStart(2, '0')}`
-  return fakeDigits(value)
+  // Amounts are masked, not made up, so nobody reads a believable wrong price off the screen.
+  return value.replace(/\d/g, 'X')
 }
 
 function escape(text: string): string {
@@ -224,6 +213,13 @@ async function announce($: EngineInterface, isOn: boolean) {
   $.ui.status(isOn ? 'SCREEN SHARE ON: private details hidden' : undefined)
 }
 
+/** Said whenever it turns on with no names: emails, phones and amounts are hidden, client names are not. */
+function noNamesWarning(names: readonly string[]): string {
+  return names.length > 0
+    ? ''
+    : '\n\nWARNING: no client names added yet, so client names WILL still show on screen. Add each one first, for example: /screen-share add Acme Plumbing'
+}
+
 const HELP = [
   '/screen-share            turn screen share mode on or off (made-up details unless you picked bars)',
   '/screen-share fake       turn it on with made-up names, emails, phone numbers and amounts',
@@ -268,9 +264,10 @@ export const register: Register = on => {
 
         return {
           text: isOn
-            ? s.style === 'fake'
-              ? `Screen share mode ON with made-up details. ${s.names.length} names become invented client names, emails and phone numbers become example ones and amounts get new digits. Keys show as bars. Claude still sees everything. Type /screen-share again to turn it off, or /screen-share bars for grey bars.`
-              : `Screen share mode ON. ${s.names.length} names, plus emails, phone numbers, amounts and keys, now show as grey bars. Claude still sees everything. Type /screen-share again to turn it off, or /screen-share fake for made-up details.`
+            ? (s.style === 'fake'
+                ? `Screen share mode ON with made-up details. ${s.names.length} names become invented client names, emails and phone numbers become example ones and amounts show as $X,XXX. Keys show as bars. Claude still sees everything. Type /screen-share again to turn it off, or /screen-share bars for grey bars.`
+                : `Screen share mode ON. ${s.names.length} names, plus emails, phone numbers, amounts and keys, now show as grey bars. Claude still sees everything. Type /screen-share again to turn it off, or /screen-share fake for made-up details.`) +
+              noNamesWarning(s.names)
             : 'Screen share mode OFF. Everything shows again.',
           isTextDisplayOnly: true,
         }
@@ -286,8 +283,9 @@ export const register: Register = on => {
         return {
           text:
             style === 'fake'
-              ? 'Screen share mode ON with made-up details. Each client gets the same invented name every time, emails and phone numbers become example ones and amounts get new digits. Keys still show as bars. Claude still sees the real data.'
-              : 'Screen share mode ON with grey bars.',
+              ? 'Screen share mode ON with made-up details. Each client gets the same invented name every time, emails and phone numbers become example ones and amounts show as $X,XXX. Keys still show as bars. Claude still sees the real data.' +
+                noNamesWarning((await read($, shield)).names)
+              : 'Screen share mode ON with grey bars.' + noNamesWarning((await read($, shield)).names),
           isTextDisplayOnly: true,
         }
       }
@@ -368,6 +366,32 @@ export const register: Register = on => {
     })
   }
 
+  // Subagent rows (the desktop app's background tasks list): their label, and their task when it holds a detail.
+  on('ui.render', { component: 'AgentRow' }, async ($, e, next) => {
+    const s = await read($, shield)
+    if (!s.isOn) return next(e)
+
+    const label = e.props.label === undefined ? undefined : redact(e.props.label, s.names, s.style)
+    const task = redact(e.props.description, s.names, s.style)
+    const props = { ...e.props, ...(label === undefined ? {} : { label }), ...(task !== e.props.description ? { body: task } : {}) }
+
+    return next({ ...e, props })
+  }).catch(async ($, e, next) => {
+    const isOn = await read($, shield)
+      .then(s => s.isOn)
+      .catch(() => true)
+
+    return isOn ? next({ ...e, props: { ...e.props, isHidden: true } }) : next(e)
+  })
+
+  // Team Board's band shows the current plan step, which often names a client: leave it out while sharing.
+  on('ui.render', { component: 'AbovePromptList' }, async ($, e, next) => {
+    const s = await read($, shield)
+    if (!s.isOn) return next(e)
+
+    return next({ ...e, props: { ...e.props, rows: e.props.rows.filter(r => r.plugin !== 'team-board') } })
+  }).catch(($, e, next) => next(e))
+
   // New workspace folders are picked up between turns, not only at the start.
   on('turn.start', async ($, e, next) => {
     if (e.agentId === undefined) {
@@ -396,9 +420,15 @@ export const register: Register = on => {
         <Text bold color="warning">
           SCREEN SHARE ON{' '}
         </Text>
-        <Text dimColor>
-          {s.style === 'fake' ? 'showing made-up names and numbers ' : 'names, emails, phone numbers, amounts and keys hidden '}
-        </Text>
+        {s.names.length === 0 ? (
+          <Text bold color="error">
+            no client names added, they still show (/screen-share add NAME){' '}
+          </Text>
+        ) : (
+          <Text dimColor>
+            {s.style === 'fake' ? 'showing made-up names and numbers ' : 'names, emails, phone numbers, amounts and keys hidden '}
+          </Text>
+        )}
         <Button
           key="off"
           label="Turn off"

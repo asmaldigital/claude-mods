@@ -5,7 +5,7 @@ Long chats get worse: the fuller the context window, the more Claude misses deta
 ## How it works
 
 - **It speaks up on its own.** Once the chat passes 55% context, a band above the message box offers to prepare a handoff. Press Later to hide it for this chat.
-- **Or type `/handoff` any time.** The handoff is shown right there in the chat, so you can read and copy it.
+- **Or type `/handoff` any time.** The handoff is shown right there in the chat, so you can read and copy it. If another plugin already uses `/handoff` (Command Center does), the command is `/handoff-chat` instead.
 - **It packs everything a fresh chat needs:** where the work started, your latest request, the plan and which steps are done, the files changed, the files read, the skills used, recent commands, the links you shared, and Claude's last reply, marked as earlier context.
 - **Secrets stay out.** Keys, tokens, passwords, logins inside links and link query strings are removed before the handoff is saved, copied or shown. Raw commands are left out; only their descriptions go in.
 - **Pick up in a new chat.** Open a new chat in the same folder and a band shows "Handoff waiting". Press Pick up and the handoff lands in your message box, ready to send. It is offered for 48 hours, then deleted. Not now deletes it too.
